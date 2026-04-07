@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fichas de Julgados</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --border-strong: #C8C2B8;
+    --text: #1A1714;
+    --text-muted: #7A7570;
+    --text-faint: #B0ABA5;
+    --accent: #2B4D6F;
+    --accent-light: #EBF0F5;
+    --amber: #7A4F1A;
+    --amber-light: #FBF3E8;
+    --green: #1A5C3A;
+    --green-light: #EBF5EF;
+    --purple: #3D2D6E;
+    --purple-light: #F0EDFB;
+    --gray-light: #F0EDE8;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--accent);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-left h1 {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .header-left p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 2px;
+  }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: #fff; color: var(--accent); }
+  .btn-ghost { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.22); }
+  .btn-danger { background: #C0392B; color: #fff; }
+
+  /* ── DRIVE STATUS BAR ── */
+  #drive-bar {
+    background: #1e3a52;
+    padding: 8px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    flex-wrap: wrap;
+  }
+  #drive-bar .drive-info { display: flex; align-items: center; gap: 8px; }
+  #drive-status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #aaa; flex-shrink: 0;
+    transition: background .3s;
+  }
+  #drive-status-dot.connected { background: #4ade80; }
+  #drive-status-dot.syncing { background: #facc15; animation: pulse 1s infinite; }
+  #drive-status-dot.error { background: #f87171; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  #drive-status-text { color: rgba(255,255,255,0.75); }
+  .drive-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px; font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.1);
+    color: #fff; cursor: pointer;
+  }
+  .drive-btn:hover { background: rgba(255,255,255,0.18); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 900px; margin: 0 auto; padding: 28px 24px; }
+
+  /* ── STATS BAR ── */
+  .stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .stat strong { color: var(--text); font-weight: 500; }
+
+  /* ── FILTERS ── */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label { font-size: 12px; color: var(--text-faint); margin-right: 4px; }
+  .filter-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .filter-btn:hover:not(.active) { border-color: var(--border-strong); color: var(--text); }
+
+  /* ── SEARCH ── */
+  .search-row { margin-bottom: 24px; }
+  .search-row input {
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-row input:focus { border-color: var(--accent); }
+  .search-row input::placeholder { color: var(--text-faint); }
+
+  /* ── CARD LIST ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin: 24px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    transition: border-color .15s;
+  }
+  .card:hover { border-color: var(--border-strong); }
+
+  .card-head {
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .card-title { font-size: 14px; font-weight: 500; flex: 1; line-height: 1.45; }
+  .card-meta { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; flex-shrink: 0; }
+  .badge {
+    font-size: 11px; font-weight: 500; padding: 2px 8px;
+    border-radius: 10px; white-space: nowrap;
+  }
+  .badge-stf { background: var(--accent-light); color: var(--accent); }
+  .badge-stj { background: var(--amber-light); color: var(--amber); }
+  .badge-sub { background: var(--gray-light); color: var(--text-muted); border: 1px solid var(--border); }
+  .chev { font-size: 10px; color: var(--text-faint); transition: transform .2s; margin-top: 3px; flex-shrink: 0; }
+  .card.open .chev { transform: rotate(180deg); }
+
+  .card-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .card.open .card-body { display: block; }
+
+  .field {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field:last-child { border-bottom: none; }
+
+  .field-icon {
+    width: 26px; height: 26px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0; margin-top: 1px;
+  }
+  .fi-prob { background: var(--amber-light); color: var(--amber); }
+  .fi-tese { background: var(--green-light); color: var(--green); }
+  .fi-fund { background: var(--purple-light); color: var(--purple); }
+  .fi-ref  { background: var(--gray-light);  color: var(--text-muted); }
+
+  .field-inner { flex: 1; }
+  .field-label {
+    font-size: 10px; font-weight: 500;
+    color: var(--text-faint); text-transform: uppercase;
+    letter-spacing: .07em; margin-bottom: 3px;
+  }
+  .field-val { font-size: 13px; line-height: 1.65; color: var(--text); }
+
+  .card-actions {
+    display: flex; gap: 6px;
+    padding: 10px 16px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  .btn-sm {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-sm:hover { border-color: var(--border-strong); color: var(--text); }
+  .btn-sm.red:hover { border-color: #C0392B; color: #C0392B; }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+  }
+  .empty p { font-size: 14px; margin-top: 8px; }
+
+  /* ── MODAL ── */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 100;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    width: 100%; max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+  }
+  .modal-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h2 {
+    font-family: 'Lora', serif;
+    font-size: 16px; font-weight: 600;
+  }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 20px; color: var(--text-faint); line-height: 1;
+    padding: 0 4px;
+  }
+  .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label {
+    font-size: 12px; font-weight: 500;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em;
+  }
+  .form-required { color: #C0392B; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--text);
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    outline: none;
+    transition: border-color .15s;
+    resize: vertical;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+  .btn-save { background: var(--accent); color: #fff; border: none; padding: 9px 20px; }
+  .btn-save:hover { opacity: .9; }
+  .btn-cancel { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); padding: 9px 16px; }
+
+  /* ── PRINT ── */
+  @media print {
+    header, #drive-bar, .stats, .filters, .search-row, .header-actions,
+    .card-actions, .btn, .overlay, #fab { display: none !important; }
+
+    body { background: #fff; }
+    .container { max-width: 100%; padding: 0; }
+    .card { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 16px; box-shadow: none; }
+    .card-body { display: block !important; }
+    .section-label { break-after: avoid; }
+    .card-head { cursor: default; }
+    .chev { display: none; }
+  }
+
+  /* ── FAB ── */
+  #fab {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 52px; height: 52px;
+    background: var(--accent);
+    color: #fff; font-size: 26px; font-weight: 300;
+    border: none; border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    transition: transform .15s, opacity .15s;
+    z-index: 50;
+  }
+  #fab:hover { transform: scale(1.07); }
+
+  /* ── COUNTER ── */
+  #counter { font-size: 13px; color: var(--text-faint); margin-bottom: 16px; }
+
+  /* ── CONFIG MODAL ── */
+  #config-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #config-overlay.open { display: flex; }
+  .config-modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    width: 100%; max-width: 520px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .config-section { padding: 20px; border-bottom: 1px solid var(--border); }
+  .config-section:last-child { border-bottom: none; }
+  .config-section h3 {
+    font-family: 'Lora', serif;
+    font-size: 14px; font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .config-section p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px; }
+  .config-section input {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: var(--text);
+    width: 100%; padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface); outline: none;
+    transition: border-color .15s;
+  }
+  .config-section input:focus { border-color: var(--accent); }
+  .config-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+  .hint { font-size: 11px; color: var(--text-faint); margin-top: 6px; line-height: 1.5; }
+  code {
+    font-family: monospace; font-size: 11px;
+    background: var(--gray-light); padding: 1px 5px;
+    border-radius: 3px; color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Fichas de Julgados</h1>
+    <p>STF &amp; STJ — Repercussão Geral e Recursos Repetitivos</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="exportar()">Exportar JSON</button>
+    <button class="btn btn-ghost" onclick="importarClick()">Importar JSON</button>
+    <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
+  </div>
+</header>
+
+<!-- BARRA DE STATUS DO DRIVE -->
+<div id="drive-bar">
+  <div class="drive-info">
+    <div id="drive-status-dot"></div>
+    <span id="drive-status-text">Google Drive não configurado</span>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <button class="drive-btn" onclick="sincronizarDrive()" id="btn-sync" style="display:none">↻ Sincronizar</button>
+    <button class="drive-btn" onclick="abrirConfig()">⚙ Configurar Drive</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats" id="stats"></div>
+
+  <div class="search-row">
+    <input type="text" id="busca" placeholder="Buscar por título, tese, subtema..." oninput="renderLista()">
+  </div>
+
+  <div class="filters" id="filtros">
+    <span class="filter-label">Filtrar:</span>
+  </div>
+
+  <div id="counter"></div>
+  <div id="lista"></div>
+</div>
+
+<button id="fab" onclick="abrirModal()" title="Nova ficha">+</button>
+
+<!-- MODAL FICHA -->
+<div class="overlay" id="overlay" onclick="fecharSeOverlay(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h2 id="modal-titulo">Nova ficha</h2>
+      <button class="modal-close" onclick="fecharModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Título <span class="form-required">*</span></label>
+        <input type="text" id="f-titulo" placeholder="Ex: Estabilidade da gestante independe de o empregador saber da gravidez">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tribunal <span class="form-required">*</span></label>
+          <select id="f-tribunal">
+            <option value="STF">STF</option>
+            <option value="STJ">STJ</option>
+            <option value="STF/STJ">STF/STJ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subtema / Matéria</label>
+          <input type="text" id="f-sub" placeholder="Ex: Direitos sociais, Saúde, Penal...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Problema <span class="form-required">*</span></label>
+        <textarea id="f-prob" rows="2" placeholder="Qual era a controvérsia jurídica central? Escreva como uma pergunta."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tese <span class="form-required">*</span></label>
+        <textarea id="f-tese" rows="4" placeholder="O que o tribunal decidiu? Reescreva com suas próprias palavras."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fundamento</label>
+        <input type="text" id="f-fund" placeholder="Ex: Art. 5º, XXXVI, CF — ato jurídico perfeito">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Referência</label>
+        <input type="text" id="f-ref" placeholder="Ex: RE 629053 · Tema 497 · Info 919 · STF 2018">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarFicha()">Salvar ficha</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIG DRIVE -->
+<div id="config-overlay" onclick="fecharConfigSeOverlay(event)">
+  <div class="config-modal">
+    <div class="modal-header" style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <h2 style="font-family:'Lora',serif;font-size:16px;font-weight:600;">Configurar Google Drive</h2>
+      <button class="modal-close" onclick="fecharConfig()">×</button>
+    </div>
+    <div class="config-section">
+      <h3>Client ID (OAuth 2.0)</h3>
+      <p>Cole aqui o <strong>Client ID</strong> gerado no Google Cloud Console. Ele tem o formato <code>xxxx.apps.googleusercontent.com</code>.</p>
+      <input type="text" id="cfg-client-id" placeholder="Cole seu Client ID aqui">
+      <p class="hint">Não sabe como obter? Consulte o guia <strong>COMO-CONFIGURAR.md</strong> incluído junto a este arquivo.</p>
+    </div>
+    <div class="config-section">
+      <h3>Nome do arquivo no Drive</h3>
+      <p>Arquivo JSON onde suas fichas serão salvas no Drive (em "Meu Drive").</p>
+      <input type="text" id="cfg-filename" placeholder="fichas-julgados.json">
+      <p class="hint">Deixe em branco para usar o padrão <code>fichas-julgados.json</code>.</p>
+    </div>
+    <div class="config-footer">
+      <button class="btn btn-cancel" onclick="fecharConfig()">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarConfig()">Salvar e conectar</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".json" style="display:none" onchange="importarJSON(event)">
+
+<!-- Google API -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIGURAÇÃO
+// ══════════════════════════════════════════════
+const STORAGE_KEY   = 'fichas_julgados_v1';
+const CFG_KEY       = 'fichas_drive_cfg';
+const SCOPES        = 'https://www.googleapis.com/auth/drive.file';
+
+let fichas      = [];
+let editandoId  = null;
+let filtroAtivo = null;
+
+// Estado do Drive
+let driveReady      = false;
+let driveFileId     = null;  // ID do arquivo no Drive (após localizar/criar)
+let tokenClient     = null;
+let accessToken     = null;
+
+// ── Config salva no localStorage ──
+function getCfg() {
+  try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch { return {}; }
+}
+function setCfg(obj) {
+  localStorage.setItem(CFG_KEY, JSON.stringify(obj));
+}
+
+// ══════════════════════════════════════════════
+//  INICIALIZAÇÃO
+// ══════════════════════════════════════════════
+function gerarId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+window.addEventListener('load', () => {
+  carregarLocal();
+  renderStats(); renderFiltros(); renderLista();
+
+  const cfg = getCfg();
+  if (cfg.clientId) {
+    setStatus('syncing', 'Conectando ao Drive...');
+    initGIS(cfg.clientId);
+  } else {
+    setStatus('off', 'Google Drive não configurado');
+  }
+});
+
+// ══════════════════════════════════════════════
+//  LOCAL STORAGE (fallback)
+// ══════════════════════════════════════════════
+function carregarLocal() {
+  try { fichas = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { fichas = []; }
+}
+
+function salvarLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(fichas));
+}
+
+// ══════════════════════════════════════════════
+//  GOOGLE IDENTITY SERVICES (OAuth 2.0)
+// ══════════════════════════════════════════════
+function initGIS(clientId) {
+  // Aguarda a lib carregar
+  const tryInit = () => {
+    if (typeof google === 'undefined' || !google.accounts) {
+      setTimeout(tryInit, 300); return;
+    }
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: SCOPES,
+      callback: onTokenReceived,
+    });
+    // Tenta obter token silenciosamente (sem popup)
+    tokenClient.requestAccessToken({ prompt: '' });
+  };
+  tryInit();
+}
+
+function onTokenReceived(resp) {
+  if (resp.error) {
+    if (resp.error === 'interaction_required') {
+      // Precisa do popup — aguarda ação do usuário
+      setStatus('off', 'Clique em "Conectar Drive" para fazer login');
+      document.getElementById('btn-sync').style.display = '';
+      document.getElementById('btn-sync').textContent = '🔑 Conectar Drive';
+      document.getElementById('btn-sync').onclick = () => tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+      setStatus('error', 'Erro ao autenticar: ' + resp.error);
+    }
+    return;
+  }
+  accessToken = resp.access_token;
+  gapi.load('client', async () => {
+    await gapi.client.init({});
+    gapi.client.setToken({ access_token: accessToken });
+    driveReady = true;
+    document.getElementById('btn-sync').style.display = '';
+    document.getElementById('btn-sync').textContent = '↻ Sincronizar';
+    document.getElementById('btn-sync').onclick = sincronizarDrive;
+    setStatus('syncing', 'Carregando fichas do Drive...');
+    await carregarDoDrive();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  GOOGLE DRIVE API
+// ══════════════════════════════════════════════
+function nomeArquivo() {
+  return getCfg().filename || 'fichas-julgados.json';
+}
+
+async function buscarArquivoDrive() {
+  const nome = nomeArquivo();
+  const resp = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=name='${nome}' and trashed=false&fields=files(id,name)`,
+    { headers: { Authorization: 'Bearer ' + accessToken } }
+  );
+  const data = await resp.json();
+  if (data.files && data.files.length > 0) {
+    driveFileId = data.files[0].id;
+    return driveFileId;
+  }
+  return null;
+}
+
+async function carregarDoDrive() {
+  try {
+    const fid = await buscarArquivoDrive();
+    if (!fid) {
+      // Arquivo não existe ainda — usamos o local e criamos ao salvar
+      setStatus('connected', 'Drive conectado · Sem fichas no Drive ainda');
+      return;
+    }
+    const resp = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fid}?alt=media`,
+      { headers: { Authorization: 'Bearer ' + accessToken } }
+    );
+    const dados = await resp.json();
+    if (Array.isArray(dados) && dados.length > 0) {
+      // Merge: Drive tem prioridade, mas mantém itens locais não presentes no Drive
+      const idsRemoto = new Set(dados.map(x => x.id));
+      const soLocal = fichas.filter(x => !idsRemoto.has(x.id));
+      fichas = [...dados, ...soLocal];
+      salvarLocal();
+      renderStats(); renderFiltros(); renderLista();
+    }
+    setStatus('connected', 'Drive conectado · ' + nomeArquivo());
+  } catch (e) {
+    setStatus('error', 'Erro ao carregar do Drive');
+    console.error(e);
+  }
+}
+
+async function salvarNoDrive() {
+  if (!driveReady || !accessToken) return;
+  setStatus('syncing', 'Salvando no Drive...');
+  try {
+    const conteudo = JSON.stringify(fichas, null, 2);
+    const blob = new Blob([conteudo], { type: 'application/json' });
+
+    if (!driveFileId) {
+      // Criar arquivo novo
+      const meta = JSON.stringify({ name: nomeArquivo(), mimeType: 'application/json' });
+      const form = new FormData();
+      form.append('metadata', new Blob([meta], { type: 'application/json' }));
+      form.append('file', blob);
+      const resp = await fetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+        { method: 'POST', headers: { Authorization: 'Bearer ' + accessToken }, body: form }
+      );
+      const data = await resp.json();
+      driveFileId = data.id;
+    } else {
+      // Atualizar arquivo existente
+      await fetch(
+        `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,
+        { method: 'PATCH', headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: conteudo }
+      );
+    }
+    setStatus('connected', 'Drive conectado · Salvo agora · ' + nomeArquivo());
+  } catch (e) {
+    setStatus('error', 'Erro ao salvar no Drive');
+    console.error(e);
+  }
+}
+
+async function sincronizarDrive() {
+  if (!driveReady) return;
+  setStatus('syncing', 'Sincronizando...');
+  driveFileId = null;
+  await carregarDoDrive();
+}
+
+// ══════════════════════════════════════════════
+//  STATUS BAR
+// ══════════════════════════════════════════════
+function setStatus(tipo, msg) {
+  const dot  = document.getElementById('drive-status-dot');
+  const text = document.getElementById('drive-status-text');
+  dot.className = '';
+  if (tipo === 'connected') dot.classList.add('connected');
+  else if (tipo === 'syncing') dot.classList.add('syncing');
+  else if (tipo === 'error')   dot.classList.add('error');
+  text.textContent = msg;
+}
+
+// ══════════════════════════════════════════════
+//  CONFIG MODAL
+// ══════════════════════════════════════════════
+function abrirConfig() {
+  const cfg = getCfg();
+  document.getElementById('cfg-client-id').value = cfg.clientId || '';
+  document.getElementById('cfg-filename').value  = cfg.filename  || '';
+  document.getElementById('config-overlay').classList.add('open');
+}
+function fecharConfig() {
+  document.getElementById('config-overlay').classList.remove('open');
+}
+function fecharConfigSeOverlay(e) {
+  if (e.target === document.getElementById('config-overlay')) fecharConfig();
+}
+function salvarConfig() {
+  const clientId = document.getElementById('cfg-client-id').value.trim();
+  const filename = document.getElementById('cfg-filename').value.trim();
+  if (!clientId) { alert('Informe o Client ID.'); return; }
+  setCfg({ clientId, filename: filename || 'fichas-julgados.json' });
+  fecharConfig();
+  driveReady = false; driveFileId = null; accessToken = null;
+  setStatus('syncing', 'Conectando...');
+  initGIS(clientId);
+}
+
+// ══════════════════════════════════════════════
+//  CRUD DE FICHAS
+// ══════════════════════════════════════════════
+function salvar() {
+  salvarLocal();
+  salvarNoDrive(); // assíncrono, não bloqueia UI
+}
+
+function abrirModal(id) {
+  editandoId = id || null;
+  document.getElementById('modal-titulo').textContent = id ? 'Editar ficha' : 'Nova ficha';
+  if (id) {
+    const f = fichas.find(x => x.id === id);
+    if (!f) return;
+    document.getElementById('f-titulo').value = f.titulo;
+    document.getElementById('f-tribunal').value = f.tribunal;
+    document.getElementById('f-sub').value = f.sub || '';
+    document.getElementById('f-prob').value = f.prob;
+    document.getElementById('f-tese').value = f.tese;
+    document.getElementById('f-fund').value = f.fund || '';
+    document.getElementById('f-ref').value = f.ref || '';
+  } else {
+    ['f-titulo','f-sub','f-prob','f-tese','f-fund','f-ref'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('f-tribunal').value = 'STF';
+  }
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('f-titulo').focus();
+}
+
+function fecharModal() {
+  document.getElementById('overlay').classList.remove('open');
+  editandoId = null;
+}
+
+function fecharSeOverlay(e) {
+  if (e.target === document.getElementById('overlay')) fecharModal();
+}
+
+function salvarFicha() {
+  const titulo = document.getElementById('f-titulo').value.trim();
+  const prob   = document.getElementById('f-prob').value.trim();
+  const tese   = document.getElementById('f-tese').value.trim();
+  if (!titulo || !prob || !tese) {
+    alert('Preencha os campos obrigatórios: Título, Problema e Tese.');
+    return;
+  }
+  const ficha = {
+    id:       editandoId || gerarId(),
+    titulo,
+    tribunal: document.getElementById('f-tribunal').value,
+    sub:      document.getElementById('f-sub').value.trim(),
+    prob, tese,
+    fund:     document.getElementById('f-fund').value.trim(),
+    ref:      document.getElementById('f-ref').value.trim(),
+    criadaEm: editandoId ? (fichas.find(x=>x.id===editandoId)?.criadaEm || Date.now()) : Date.now(),
+  };
+  if (editandoId) {
+    fichas = fichas.map(x => x.id === editandoId ? ficha : x);
+  } else {
+    fichas.unshift(ficha);
+  }
+  salvar();
+  fecharModal();
+  renderLista(); renderStats(); renderFiltros();
+}
+
+function excluir(id) {
+  if (!confirm('Excluir esta ficha?')) return;
+  fichas = fichas.filter(x => x.id !== id);
+  salvar();
+  renderLista(); renderStats(); renderFiltros();
+}
+
+// ══════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════
+function renderStats() {
+  const total = fichas.length;
+  const stf = fichas.filter(x=>x.tribunal==='STF'||x.tribunal==='STF/STJ').length;
+  const stj = fichas.filter(x=>x.tribunal==='STJ'||x.tribunal==='STF/STJ').length;
+  const temas = [...new Set(fichas.map(x=>x.sub).filter(Boolean))].length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat">Total: <strong>${total}</strong> ficha${total!==1?'s':''}</div>
+    <div class="stat">STF: <strong>${stf}</strong></div>
+    <div class="stat">STJ: <strong>${stj}</strong></div>
+    <div class="stat">Subtemas: <strong>${temas}</strong></div>
+  `;
+}
+
+function renderFiltros() {
+  const subtemas = [...new Set(fichas.map(x=>x.sub).filter(Boolean))].sort();
+  const wrap = document.getElementById('filtros');
+  wrap.innerHTML = '<span class="filter-label">Filtrar:</span>';
+  const all = document.createElement('button');
+  all.className = 'filter-btn' + (!filtroAtivo ? ' active' : '');
+  all.textContent = 'Todos';
+  all.onclick = () => { filtroAtivo = null; renderFiltros(); renderLista(); };
+  wrap.appendChild(all);
+  subtemas.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (filtroAtivo===s ? ' active' : '');
+    btn.textContent = s;
+    btn.onclick = () => { filtroAtivo = s; renderFiltros(); renderLista(); };
+    wrap.appendChild(btn);
+  });
+}
+
+function renderLista() {
+  const q = document.getElementById('busca').value.toLowerCase().trim();
+  const filtered = fichas.filter(f => {
+    const matchSub = !filtroAtivo || f.sub === filtroAtivo;
+    const matchQ = !q || [f.titulo,f.prob,f.tese,f.sub,f.fund,f.ref].some(v=>v&&v.toLowerCase().includes(q));
+    return matchSub && matchQ;
+  });
+  document.getElementById('counter').textContent =
+    filtered.length + ' ficha' + (filtered.length!==1?'s':'') + ' encontrada' + (filtered.length!==1?'s':'');
+
+  if (!filtered.length) {
+    document.getElementById('lista').innerHTML = fichas.length === 0
+      ? `<div class="empty"><div style="font-size:36px">📋</div><p>Nenhuma ficha ainda.<br>Clique no <strong>+</strong> para criar sua primeira ficha.</p></div>`
+      : `<div class="empty"><p>Nenhuma ficha encontrada para essa busca.</p></div>`;
+    return;
+  }
+
+  const grupos = {};
+  filtered.forEach(f => {
+    const key = f.sub || '—';
+    if (!grupos[key]) grupos[key] = [];
+    grupos[key].push(f);
+  });
+
+  let html = '';
+  Object.keys(grupos).sort().forEach(sub => {
+    html += `<div class="section-label">${sub}</div>`;
+    grupos[sub].forEach(f => {
+      const badgeTri = f.tribunal === 'STJ' ? 'badge-stj' : 'badge-stf';
+      html += `
+      <div class="card" id="card-${f.id}">
+        <div class="card-head" onclick="toggleCard('${f.id}')">
+          <div class="card-title">${esc(f.titulo)}</div>
+          <div class="card-meta">
+            <span class="badge ${badgeTri}">${esc(f.tribunal)}</span>
+            ${f.sub ? `<span class="badge badge-sub">${esc(f.sub)}</span>` : ''}
+          </div>
+          <span class="chev">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-icon fi-prob">?</div>
+            <div class="field-inner">
+              <div class="field-label">Problema</div>
+              <div class="field-val">${esc(f.prob)}</div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-icon fi-tese">≡</div>
+            <div class="field-inner">
+              <div class="field-label">Tese</div>
+              <div class="field-val">${esc(f.tese)}</div>
+            </div>
+          </div>
+          ${f.fund ? `<div class="field"><div class="field-icon fi-fund">△</div><div class="field-inner"><div class="field-label">Fundamento</div><div class="field-val">${esc(f.fund)}</div></div></div>` : ''}
+          ${f.ref  ? `<div class="field"><div class="field-icon fi-ref">i</div><div class="field-inner"><div class="field-label">Referência</div><div class="field-val">${esc(f.ref)}</div></div></div>` : ''}
+          <div class="card-actions">
+            <button class="btn-sm" onclick="abrirModal('${f.id}')">Editar</button>
+            <button class="btn-sm red" onclick="excluir('${f.id}')">Excluir</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('lista').innerHTML = html;
+}
+
+function toggleCard(id) {
+  const el = document.getElementById('card-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ══════════════════════════════════════════════
+//  EXPORT / IMPORT
+// ══════════════════════════════════════════════
+function exportar() {
+  if (!fichas.length) { alert('Nenhuma ficha para exportar.'); return; }
+  const blob = new Blob([JSON.stringify(fichas, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fichas-julgados-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function importarClick() { document.getElementById('file-input').click(); }
+
+function importarJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const dados = JSON.parse(ev.target.result);
+      if (!Array.isArray(dados)) throw new Error();
+      const confirmMsg = fichas.length
+        ? `Isso vai adicionar ${dados.length} ficha(s) às suas ${fichas.length} existentes. Continuar?`
+        : `Importar ${dados.length} ficha(s)?`;
+      if (!confirm(confirmMsg)) return;
+      const idsExistentes = new Set(fichas.map(x=>x.id));
+      dados.forEach(f => { if (!idsExistentes.has(f.id)) fichas.push(f); });
+      salvar();
+      renderLista(); renderStats(); renderFiltros();
+      alert('Importação concluída!');
+    } catch { alert('Arquivo inválido. Use um JSON exportado por este sistema.'); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════════
+//  ATALHOS
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'n' && !document.getElementById('overlay').classList.contains('open')
+      && document.activeElement.tagName !== 'INPUT'
+      && document.activeElement.tagName !== 'TEXTAREA') {
+    abrirModal();
+  }
+  if (e.key === 'Escape') { fecharModal(); fecharConfig(); }
+});
+</script>
+</body>
+</html>
