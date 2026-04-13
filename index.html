@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fichas de Julgados</title>
+<!-- favicon já inserido abaixo -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -520,12 +522,6 @@
       <button class="modal-close" onclick="fecharConfig()">×</button>
     </div>
     <div class="config-section">
-      <h3>Client ID (OAuth 2.0)</h3>
-      <p>Cole aqui o <strong>Client ID</strong> gerado no Google Cloud Console. Ele tem o formato <code>xxxx.apps.googleusercontent.com</code>.</p>
-      <input type="text" id="cfg-client-id" placeholder="Cole seu Client ID aqui">
-      <p class="hint">Não sabe como obter? Consulte o guia <strong>COMO-CONFIGURAR.md</strong> incluído junto a este arquivo.</p>
-    </div>
-    <div class="config-section">
       <h3>Nome do arquivo no Drive</h3>
       <p>Arquivo JSON onde suas fichas serão salvas no Drive (em "Meu Drive").</p>
       <input type="text" id="cfg-filename" placeholder="fichas-julgados.json">
@@ -533,7 +529,7 @@
     </div>
     <div class="config-footer">
       <button class="btn btn-cancel" onclick="fecharConfig()">Cancelar</button>
-      <button class="btn btn-save" onclick="salvarConfig()">Salvar e conectar</button>
+      <button class="btn btn-save" onclick="salvarConfig()">Salvar e reconectar</button>
     </div>
   </div>
 </div>
@@ -549,6 +545,7 @@
 //  CONFIGURAÇÃO
 // ══════════════════════════════════════════════
 const STORAGE_KEY   = 'fichas_julgados_v1';
+const CLIENT_ID     = '969223471095-rvruhblhgaogov7iru4iu2simp4tq637.apps.googleusercontent.com';
 const CFG_KEY       = 'fichas_drive_cfg';
 const SCOPES        = 'https://www.googleapis.com/auth/drive.file';
 
@@ -581,13 +578,9 @@ window.addEventListener('load', () => {
   carregarLocal();
   renderStats(); renderFiltros(); renderLista();
 
-  const cfg = getCfg();
-  if (cfg.clientId) {
-    setStatus('syncing', 'Conectando ao Drive...');
-    initGIS(cfg.clientId);
-  } else {
-    setStatus('off', 'Google Drive não configurado');
-  }
+  // Client ID fixo — conecta automaticamente
+  setStatus('syncing', 'Conectando ao Drive...');
+  initGIS(CLIENT_ID);
 });
 
 // ══════════════════════════════════════════════
@@ -755,8 +748,7 @@ function setStatus(tipo, msg) {
 // ══════════════════════════════════════════════
 function abrirConfig() {
   const cfg = getCfg();
-  document.getElementById('cfg-client-id').value = cfg.clientId || '';
-  document.getElementById('cfg-filename').value  = cfg.filename  || '';
+  document.getElementById('cfg-filename').value = cfg.filename || '';
   document.getElementById('config-overlay').classList.add('open');
 }
 function fecharConfig() {
@@ -766,14 +758,12 @@ function fecharConfigSeOverlay(e) {
   if (e.target === document.getElementById('config-overlay')) fecharConfig();
 }
 function salvarConfig() {
-  const clientId = document.getElementById('cfg-client-id').value.trim();
   const filename = document.getElementById('cfg-filename').value.trim();
-  if (!clientId) { alert('Informe o Client ID.'); return; }
-  setCfg({ clientId, filename: filename || 'fichas-julgados.json' });
+  setCfg({ filename: filename || 'fichas-julgados.json' });
   fecharConfig();
   driveReady = false; driveFileId = null; accessToken = null;
-  setStatus('syncing', 'Conectando...');
-  initGIS(clientId);
+  setStatus('syncing', 'Reconectando...');
+  initGIS(CLIENT_ID);
 }
 
 // ══════════════════════════════════════════════
